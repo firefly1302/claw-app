@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect to Claw - AI Assistant Pairing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .wizard {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00d4ff, #66ff66);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            margin-bottom: 40px;
+        }
+
+        .pairing-code {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .code-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #00d4ff;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .code-instructions {
+            font-size: 1rem;
+            color: #cccccc;
+            margin-bottom: 30px;
+        }
+
+        .steps {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            background: linear-gradient(45deg, #00d4ff, #66ff66);
+            color: white;
+            font-weight: bold;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+
+        .step-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .step-content p {
+            color: #b0b0b0;
+            line-height: 1.5;
+        }
+
+        .download-button {
+            background: linear-gradient(45deg, #00d4ff, #66ff66);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px;
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        .terminal-preview {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            text-align: left;
+            border: 1px solid #333;
+        }
+
+        .terminal-line {
+            margin: 5px 0;
+        }
+
+        .terminal-prompt {
+            color: #00d4ff;
+        }
+
+        .terminal-command {
+            color: #66ff66;
+        }
+
+        .sparkle {
+            position: absolute;
+            animation: sparkle 2s infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .footer {
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background: rgba(255, 50, 50, 0.1);
+            border: 2px solid rgba(255, 50, 50, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #ff6666;
+        }
+
+        @media (max-width: 768px) {
+            .code-display {
+                font-size: 2rem;
+                letter-spacing: 4px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .step {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .step-number {
+                margin-bottom: 15px;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="wizard">🧙‍♂️</div>
+            <h1>Connect Your Computer</h1>
+            <p class="subtitle">Install Claw on your computer to unlock AI-powered assistance</p>
+        </div>
+
+        <div id="content">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+
+        <div class="footer">
+            <p>🪄 Powered by OpenClaw • Secure • Private • Local</p>
+        </div>
+    </div>
+
+    <script>
+        // Add floating sparkles
+        function createSparkle() {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.innerHTML = '✨';
+            sparkle.style.left = Math.random() * 100 + '%';
+            sparkle.style.top = Math.random() * 100 + '%';
+            sparkle.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            document.body.appendChild(sparkle);
+            
+            setTimeout(() => {
+                sparkle.remove();
+            }, 2000);
+        }
+
+        // Create sparkles periodically
+        setInterval(createSparkle, 3000);
+        
+        // Get pairing code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pairingCode = urlParams.get('code');
+        
+        function renderContent() {
+            const content = document.getElementById('content');
+            
+            if (!pairingCode) {
+                content.innerHTML = `
+                    <div class="error-message">
+                        <h3>⚠️ No Pairing Code</h3>
+                        <p>This page requires a pairing code. Please scan the QR code from your Claw mobile app or use the direct link provided.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            content.innerHTML = `
+                <div class="pairing-code">
+                    <div class="code-display">${pairingCode}</div>
+                    <p class="code-instructions">Your pairing code (keep this page open)</p>
+                </div>
+
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Download & Install</h3>
+                            <p>Download the installer script that will set up OpenClaw on your computer</p>
+                            <a href="#" class="download-button" onclick="downloadInstaller()">
+                                📥 Download Installer
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Run the Installer</h3>
+                            <p>Open Terminal (Mac/Linux) or Command Prompt (Windows) and run the downloaded script:</p>
+                            <div class="terminal-preview">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span> 
+                                    <span class="terminal-command">chmod +x install-claw.sh && ./install-claw.sh</span>
+                                </div>
+                                <div class="terminal-line">Installing OpenClaw...</div>
+                                <div class="terminal-line">✅ Installation complete!</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Connect Automatically</h3>
+                            <p>The installer will automatically connect your computer using the pairing code above. No manual setup required!</p>
+                            <div class="terminal-preview">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span> 
+                                    <span class="terminal-command">openclaw pair ${pairingCode}</span>
+                                </div>
+                                <div class="terminal-line">🎉 Successfully paired with your mobile device!</div>
+                                <div class="terminal-line">🧙‍♂️ Your AI assistant is now available on this computer</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(102, 255, 102, 0.1); border: 2px solid rgba(102, 255, 102, 0.3); border-radius: 10px; padding: 20px; margin-top: 30px;">
+                    <h3 style="color: #66ff66; margin-bottom: 15px;">🚀 What happens next?</h3>
+                    <ul style="text-align: left; color: #cccccc; line-height: 1.8;">
+                        <li>Your computer will be securely connected to your Claw mobile app</li>
+                        <li>You can chat with your AI assistant and it can help with computer tasks</li>
+                        <li>All processing happens locally - your data stays private</li>
+                        <li>Use voice commands, file operations, web browsing assistance, and more!</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        function downloadInstaller() {
+            const script = generateInstallerScript();
+            const blob = new Blob([script], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'install-claw.sh';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function generateInstallerScript() {
+            return \`#!/bin/bash
+
+# Claw AI Assistant Installer
+# This script installs OpenClaw and pairs it with your mobile device
+
+set -e
+
+echo "🧙‍♂️ Installing Claw AI Assistant..."
+echo "=================================="
+
+# Check if Node.js is installed
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js is required but not installed."
+    echo "📥 Please install Node.js from https://nodejs.org"
+    echo "🔄 Then run this script again."
+    exit 1
+fi
+
+# Check if npm is installed
+if ! command -v npm &> /dev/null; then
+    echo "❌ npm is required but not installed."
+    echo "📥 Please install Node.js (which includes npm) from https://nodejs.org"
+    exit 1
+fi
+
+echo "✅ Node.js found: \$(node --version)"
+echo "✅ npm found: \$(npm --version)"
+echo ""
+
+# Install OpenClaw globally
+echo "📦 Installing OpenClaw..."
+npm install -g openclaw
+
+if [ $? -eq 0 ]; then
+    echo "✅ OpenClaw installed successfully!"
+else
+    echo "❌ Failed to install OpenClaw"
+    echo "🔧 You may need to run with sudo: sudo npm install -g openclaw"
+    exit 1
+fi
+
+echo ""
+echo "🔗 Pairing with your mobile device..."
+
+# Pair with the mobile device using the code
+openclaw pair ${pairingCode}
+
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "🎉 SUCCESS! Your computer is now connected to Claw!"
+    echo "=================================="
+    echo "🧙‍♂️ You can now use your AI assistant on this computer"
+    echo "💬 Start chatting in your mobile app - your AI can now help with:"
+    echo "   • File operations and management"
+    echo "   • Web browsing assistance" 
+    echo "   • Running terminal commands"
+    echo "   • Taking screenshots"
+    echo "   • And much more!"
+    echo ""
+    echo "🛡️  Your data stays private and secure on your devices"
+    echo "📱 Return to your mobile app to start chatting!"
+else
+    echo "❌ Pairing failed. Please try again or check your pairing code."
+    exit 1
+fi
+\`;
+        }
+        
+        // Render the page content
+        renderContent();
+    </script>
+</body>
+</html>
